@@ -7,29 +7,44 @@
 #include <limits>
 
 template<typename real_scalar_type>
-int wigner3j(
-    std::vector<real_scalar_type> const & thrcof,
+std::vector<real_scalar_type> wigner3j(
     long const l2,
     long const l3,
     long const m2,
-    long const m3,
-    long const l1_min,
-    long const l1_max,
-    long const ndim
+    long const m3
 )
 {
+    long m1 = -(m2+m3);
+    long const l1min =  std::max(std::abs(l2-l3),std::abs(m1));
+    long const l1max = l2+l3;
+    long const ndim = l1max-l1min+1;
+
+    std::vector<real_scalar_type> thrcof(ndim);
+
+    // HUGE is the square root of one twentieth of the largest floating
+    // point number, approximately.
+    real_scalar_type const huge = std::sqrt(std::numeric_limits<real_scalar_type>::max()/real_scalar_type(20));
+    real_scalar_type const srhuge = std::sqrt(huge);
+    real_scalar_type const tiny = std::numeric_limits<real_scalar_type>::min();
+    real_scalar_type const srtiny = std::sqrt(tiny);
+
+    long const one(1);
+    long const two(2);
+
+    return thrcof;
+    /*
     int ier(0);
 
     // HUGE is the square root of one twentieth of the largest floating
     // point number, approximately.
-    const real_scalar_type huge = std::sqrt(std::numeric_limits<real_scalar_type>::max()/real_scalar_type(20));
-    const real_scalar_type srhuge = std::sqrt(huge);
-    const real_scalar_type tiny = std::numeric_limits<real_scalar_type>::min();
-    const real_scalar_type srtiny = std::sqrt(tiny);
-    const long one(1);
-    const long two(2);
+    real_scalar_type const huge = std::sqrt(std::numeric_limits<real_scalar_type>::max()/real_scalar_type(20));
+    real_scalar_type const srhuge = std::sqrt(huge);
+    real_scalar_type const tiny = std::numeric_limits<real_scalar_type>::min();
+    real_scalar_type const srtiny = std::sqrt(tiny);
+    long const one(1);
+    long const two(2);
 
-    const real_scalar_type m1 = -(m2+m3);
+    real_scalar_type const m1 = -(m2+m3);
 
     // Check error conditions 1 and 2
     if ( l2 < std::abs(m2) or l3 < std::abs(m3) )
@@ -40,8 +55,8 @@ int wigner3j(
     }
 
     // Limits for L1
-    const long l1min = std::max(std::abs(l2-l3),std::abs(m1));
-    const long l1max = l2+l3;
+    long const l1min = std::max(std::abs(l2-l3),std::abs(m1));
+    long const l1max = l2+l3;
 
     // If l1min=l1max, we have an analytical formula.
     if (l1min == l1max)
@@ -49,7 +64,9 @@ int wigner3j(
         thrcof[0] = std::pow(real_scalar_type(-1),(real_scalar_type)std::abs(l2+m2-l3+m3) )/std::sqrt( real_scalar_type(l1min+l2+l3+one) );
         ier = 0;
         return ier;
-    }
+    }*/
+
+    /*
     else
     {
         long nfin = l1max - l1min + one;
@@ -58,7 +75,7 @@ int wigner3j(
             // the dimension of thrcof is not large enough to hold
             // all the allowed values l1
             ier = -2;
-            return;
+            return ier;
         }
 
         // starting forward recursion from l1min taking nstep1 steps
@@ -67,13 +84,15 @@ int wigner3j(
         real_scalar_type c1(0);
         thrcof[1] = srtiny;
         real_scalar_type sum1 = real_scalar_type( two*l1 + one )*tiny;
+        real_scalar_type oldfac = newfac;
+        real_scalar_type denom = newfac;
 
         long lstep(1);
         while(lstep <= long(3))
         {
             lstep = lstep + long(1) ;
             l1 = l1 + long(1) ;
-            real_scalar_type oldfac = newfac;
+
             long a1 = (l1+l2+l3 + one)*(l1-l2+l3)*(l1+l2-l3)*(-l1+l2+l3 + one);
             long a2 = (l1+m1)*(l1-m1);
             newfac = std::sqrt( real_scalar_type(a1*a2) );
@@ -86,7 +105,7 @@ int wigner3j(
             else
             {
                 long dv = -l2*(l2 + one)*m1 + l3*(l3 + one)*m1 + l1*(l1 - one)*(m3-m2);
-                real_scalar_type denom = real_scalar_type(l1 - one)*newfac;
+                denom = real_scalar_type(l1 - one)*newfac;
 
                 if (lstep > long(2) )
                 {
@@ -107,16 +126,27 @@ int wigner3j(
                 real_scalar_type sumuni = sum1;
                 break;
             }
-        }
+        }//end of while(lstep <= long(3))
 
         real_scalar_type c2 = -real_scalar_type(l1)*oldfac/denom;
 
         // recursion to the next 3j-coeff x
-        real_scalar_type x = c1*thrcof(lstep-1) + c2*thrcof(lstep-2)
+        real_scalar_type x = c1*thrcof[1] + c2*thrcof[0];
+        thrcof[2] = x;
+        real_scalar_type sumfor = sum1;
+        sum1 = sum1 + real_scalar_type(two*l1 + one)*x*x;
+
+        if (lstep == nfin)
+        {
+            x1 = x;
+            x2 = thrcof(lstep-1);
+            x3 = thrcof(lstep-2);
+            nstep2 = nfin-lstep+3;
+        }
 
 
     }
 
-    return ier;
+    return ier;*/
 }
 #endif //WIGNER3J_WIGNER3J_HPP
